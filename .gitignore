@@ -1,0 +1,7 @@
+# Deno
+.deno/
+# lokale Deploy-Hilfen mit Secrets
+_tmp_deploy.bat
+_deploy.bat
+*.token
+.env
