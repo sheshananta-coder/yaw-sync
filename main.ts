@@ -37,11 +37,6 @@ async function loadAll(): Promise<Record<string, number>> {
 Deno.serve(async (req: Request) => {
   const url = new URL(req.url);
 
-  // Temporaeres Request-Logging zur Diagnose (zeigt, ob die App den Server erreicht).
-  console.log(
-    `[req] ${req.method} ${url.pathname} origin=${req.headers.get("origin") ?? "-"} ua=${(req.headers.get("user-agent") ?? "-").slice(0, 40)}`,
-  );
-
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: CORS });
   }
@@ -59,7 +54,6 @@ Deno.serve(async (req: Request) => {
       const body = await req.json();
       const name = String(body.name);
       const stars = Number(body.stars);
-      console.log(`[post] name=${name} stars=${stars}`);
       if (!name) return json({ error: "name fehlt" }, 400);
       if (stars <= 0) {
         await kv.delete(["ratings", name]);
