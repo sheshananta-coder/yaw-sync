@@ -25,9 +25,18 @@ function json(data: unknown, status = 200): Response {
   });
 }
 
-async function loadAll(): Promise<Record<string, number>> {
+// Eventual consistency: liest aus der naechstgelegenen KV-Replik statt aus der
+// Primaer-Region. Auf Deno Deploy ist ein starker (Default) list-Read sonst
+// quer ueber die Regionen extrem langsam (>20s / Timeout) — eventual bringt das
+// auf <1s. Fuer Bild-Bewertungen ist die minimale Verzoegerung der Replikation
+// (Sub-Sekunde) voellig unkritisch.
+async function loadAll(
+  consistency: Deno.KvConsistencyLevel = "eventual",
+): Promise<Record<string, number>> {
   const out: Record<string, number> = {};
-  for await (const entry of kv.list<number>({ prefix: ["ratings"] })) {
+  for await (
+    const entry of kv.list<number>({ prefix: ["ratings"] }, { consistency })
+  ) {
     const name = entry.key[1] as string;
     out[name] = entry.value;
   }
